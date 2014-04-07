@@ -19,12 +19,14 @@ class Manager(object):
 
     MULTI_LINES = (u'LineItem', u'Phone', u'Address', 'TaxRate')
     PLURAL_EXCEPTIONS = {'Addresse': 'Address'}
-    
+
     NO_SEND_FIELDS = (u'UpdatedDateUTC',)
 
     def __init__(self, name, oauth):
         self.oauth = oauth
         self.name = name
+
+        self.last_request_data = {}
 
         # setup our singular variants of the name
         # only if the name ends in 0
@@ -93,7 +95,7 @@ class Manager(object):
             # Xero will complain if we send back these fields.
             if key in self.NO_SEND_FIELDS:
                 continue
-            
+
             sub_data = data[key]
             elm = SubElement(root_elm, key)
 
@@ -151,9 +153,15 @@ class Manager(object):
 
     def _get_data(self, func):
         def wrapper(*args, **kwargs):
-            uri, params, method, body, headers = func(*args, **kwargs)
-            response = getattr(requests, method)(uri, data=body, headers=headers, auth=self.oauth, params=params)
+            self.last_request_data = dict(zip(['url', 'params', 'method', 'data', 'headers'], func(*args, **kwargs)))
+            response = getattr(requests, self.last_request_data['method'])(self.last_request_data['url'], auth=self.oauth, **self.last_request_data)
 
+            self.last_request_data['status_code'] = response.status_code
+            self.last_request_data['response_body'] = response.text
+            try:
+                self.last_request_data['content-type'] = response.headers['content-type']
+            except:
+                self.last_request_data['content-type'] = ''
             if response.status_code == 200:
                 if response.headers['content-type'] == 'application/pdf':
                     # return a byte string without doing any Unicode conversions
@@ -235,7 +243,7 @@ class Manager(object):
                 last_key = key.split('_')[-1]
                 if last_key in self.GUID_FIELDS:
                     return '%s("Guid")' % str(last_key)
-                
+
                 if key in self.BOOLEAN_FIELDS:
                     return 'true' if kwargs[key] else 'false'
                 elif key in self.DATETIME_FIELDS:
