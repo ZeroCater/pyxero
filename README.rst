@@ -215,6 +215,35 @@ This same API pattern exists for the following API objects:
  * TaxRates
  * TrackingCategories
 
+If you need access to the raw request and response data being sent to Xero, they
+are available too:
+
+    # Make some pyxero call
+    >>> xero.contacts.all()
+
+    # Url that the request was sent to
+    >>> xero.contacts.last_request_data['url']
+
+    # Params (GET arguments) that were included in the url
+    >>> xero.contacts.last_request_data['params']
+
+    # Request method ('get', 'post', 'put', etc.) that was used
+    >>> xero.contacts.last_request_data['method']
+
+    # Request headers
+    >>> xero.contacts.last_request_data['headers']
+
+    # Response status code
+    >>> xero.contacts.last_request_data['status_code']
+
+    # Response body
+    >>> xero.contacts.last_request_data['response_body']
+
+    # Content type of the response body
+    >>> xero.contacts.last_request_data['content_type']
+
+
+
 
 .. _Xero: http://developer.xero.com
 .. _requests: http://python-requests.org
