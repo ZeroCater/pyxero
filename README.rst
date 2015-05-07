@@ -1,3 +1,6 @@
+THIS IS A DEAD REPO. DO NOT USE OR STAY FOR TOO LONG!
+======
+
 PyXero
 ======
 
